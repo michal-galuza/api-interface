@@ -16,6 +16,16 @@ const fakeFetch = (url: string) =>
   });
 
 export class SharedApi {
+  private static instance: SharedApi;
+
+  public static getInstance(): SharedApi {
+    if (!SharedApi.instance) {
+      SharedApi.instance = new SharedApi();
+    }
+
+    return SharedApi.instance;
+  }
+
   public getUserListUrl() {
     return "/api/user-list";
   }

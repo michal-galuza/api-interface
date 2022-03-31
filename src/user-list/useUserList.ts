@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import { SharedApi } from "../api";
 import { IUserList } from "../types";
 
-const api = new SharedApi();
+const api = SharedApi.getInstance();
 
 export const useUserList = () => {
   const { data, isLoading } = useQuery<IUserList>(api.getUserListUrl(), () =>

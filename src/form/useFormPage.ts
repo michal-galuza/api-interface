@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { ExampleApi } from "./api";
 import { IFormValues } from "./types";
 
-const api = new ExampleApi();
+const api = ExampleApi.getInstance();
 
 const initialData: IFormValues = {
   age: 22,
@@ -13,18 +13,45 @@ const initialData: IFormValues = {
   description: undefined,
 };
 
-export const useFormPage = () => {
+const useGetFormValues = () => {
   const { data, isLoading } = useQuery<IFormValues>(
-    api.getFromValuesUrl(),
+    api.getFormValuesUrl(),
     () => api.getFormValues(),
     {
       onSuccess: (data) => data || initialData,
     }
   );
 
-  const handleSubmitForm = useCallback((values: IFormValues) => {
-    console.log(values);
-  }, []);
+  return { initialValuesForm: data, isLoading };
+};
 
-  return { initialValuesForm: data, isLoading, handleSubmitForm };
+const useSendFormValues = () => {
+  const { mutateAsync } = useMutation(api.sendFormValues);
+  const sendFormValues = useCallback(
+    async (values: IFormValues) => {
+      await mutateAsync(values);
+    },
+    [mutateAsync]
+  );
+
+  return { sendFormValues };
+};
+
+export const useFormPage = () => {
+  const { initialValuesForm, isLoading: formValuesIsLoading } =
+    useGetFormValues();
+  const { sendFormValues } = useSendFormValues();
+
+  const handleSubmitForm = useCallback(
+    async (values: IFormValues) => {
+      await sendFormValues(values);
+    },
+    [sendFormValues]
+  );
+
+  return {
+    initialValuesForm,
+    formValuesIsLoading,
+    handleSubmitForm,
+  };
 };
